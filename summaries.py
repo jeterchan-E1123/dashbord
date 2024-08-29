@@ -41,7 +41,7 @@ def get_proj_type_str(proj_type_dict, dept_type, dept_name):
         percentage = proj_type_dict[proj_type]['percentage']
         proj_list = proj_type_dict[proj_type]['projects']
         if len(proj_list) > 0:
-            result += f'- **{format(percentage, '.2%')}** of time was dedicated to **Project Type {proj_type}**, such as *{', '.join(proj_list)}*.\n'
+            result += f"- **{format(percentage, '.2%')}** of time was dedicated to **Project Type {proj_type}**, such as *{', '.join(proj_list)}*.\n"
 
         if dept_type == 'C' and proj_type == 'A' and percentage < 0.6:
             low_performance = True
@@ -125,6 +125,6 @@ In total, {employee_name} contributed **{df_ratio.work_hours.sum()} hours** duri
 '''
     
     if len(lt8_date_list) > 0:
-        summary += f'Notably, {employee_name} worked **less than 8 hours** on the following dates: {', '.join(lt8_date_list)}.\n'
+        summary += f"Notably, {employee_name} worked **less than 8 hours** on the following dates: {', '.join(lt8_date_list)}.\n"
     
     return summary
