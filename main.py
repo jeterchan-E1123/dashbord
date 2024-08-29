@@ -187,8 +187,12 @@ def display_problematic_entries(df: pd.DataFrame):
     
     container = st.container(border=True)
     task_employees = ', '.join(df.user_id.unique().tolist())
-    no_desc_percentage = df.loc[df.description == ''].shape[0] / df.shape[0]
-    with_desc_percentage = df.loc[df.description != ''].shape[0] / df.shape[0]
+    if df.shape[0] == 0:
+        no_desc_percentage = 0
+        with_desc_percentage = 0
+    else:
+        no_desc_percentage = df.loc[df.description == ''].shape[0] / df.shape[0]
+        with_desc_percentage = df.loc[df.description != ''].shape[0] / df.shape[0]
     container.markdown(f'''**Employees:** {task_employees}\n
 **Ratio:** No Description :blue-background[{format(no_desc_percentage, '.0%')}] &mdash; With Description :blue-background[{format(with_desc_percentage, '.0%')}]''')
     
