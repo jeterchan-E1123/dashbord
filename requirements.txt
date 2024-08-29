@@ -1,0 +1,9 @@
+psycopg2-binary
+streamlit
+plotly
+pandas
+numpy
+fastapi
+uvicorn
+requests
+datetime
