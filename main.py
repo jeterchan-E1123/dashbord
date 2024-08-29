@@ -213,18 +213,21 @@ def tasksum_clicked():
     st.session_state.tasksum_clicked = True
     task_summary.clear()
 
+def reset_tasksum():
+    st.session_state.tasksum_clicked = False
+
 def display_task_summary(df: pd.DataFrame, type: str):
     cols = st.columns(2)
     with cols[0]:
         project_list = df.project_name.unique().tolist()
         project_list.insert(0, 'All')
-        project_name = st.selectbox('Project', project_list, key='task_summary_project')
+        project_name = st.selectbox('Project', project_list, key='task_summary_project', on_change=reset_tasksum)
         
         if project_name != 'All':
             df = df.loc[df.project_name == project_name]
     with cols[1]:
         task_list = df.task_name.unique().tolist()
-        task_name = st.selectbox('Task', task_list, key='task_summary_task')
+        task_name = st.selectbox('Task', task_list, key='task_summary_task', on_change=reset_tasksum)
     
     st.button('Create Task Summary', use_container_width=True, on_click=tasksum_clicked)
     # if st.button('Create Task Summary', use_container_width=True, on_click=task_summary.clear):
