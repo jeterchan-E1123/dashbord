@@ -233,14 +233,11 @@ def display_task_summary(df: pd.DataFrame, type: str):
     # if st.button('Create Task Summary', use_container_width=True, on_click=task_summary.clear):
     if st.session_state.tasksum_clicked:
         with st.spinner('Creating task summary...'):
-            # try:
-            #     result = task_summary(df, task_name)
-            # except Exception as e:
-            #     st.error(e)
-            # else:
-            #     st.chat_message('ai').write(result)
-            result = task_summary(df, task_name, type=type)
-            st.chat_message('ai').write(result)
+            try:
+                result = task_summary(df, task_name, type=type)
+                st.chat_message('ai').write(result)
+            except Exception as e:
+                st.error(e)
 
 def ai_chat(df):
     container = st.container()
