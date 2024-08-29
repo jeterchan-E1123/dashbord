@@ -5,7 +5,8 @@ from selectbox import get_selectbox_items, get_employee_list
 from charts import dept_chart_task, dept_chart_ratio, employee_chart_task, employee_chart_ratio, gantt_dept, gantt_employee
 from summaries import summary_dept as _summary_dept, summary_employee as _summary_employee
 from dataframes import get_df_dept as _get_df_dept, get_df_employee as _get_df_employee
-from task_summary import task_summary as _task_summary, get_chat_answer
+from task_summary import task_summary as _task_summary
+from ai_chat import get_chat_answer
 from text_dict import text_dict
 
 project_type_colors = {'A': '#d55454', 'B': '#eea964', 'C': '#968cce', 'D': '#f2dac2'}
