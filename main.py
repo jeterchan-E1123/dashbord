@@ -27,12 +27,12 @@ project_type_colors = {'A': '#d55454', 'B': '#eea964', 'C': '#968cce', 'D': '#f2
 
 
 @st.cache_data
-def summary_dept(df, dept_no, start_date, end_date):
-    return _summary_dept(df, dept_no, start_date, end_date)
+def summary_dept(df, dept_no, start_date, end_date, language):
+    return _summary_dept(df, dept_no, start_date, end_date, language)
 
 @st.cache_data
-def summary_employee(df, employee_name, start_date, end_date):
-    return _summary_employee(df, employee_name, start_date, end_date)
+def summary_employee(df, employee_name, start_date, end_date, language):
+    return _summary_employee(df, employee_name, start_date, end_date, language)
 
 @st.cache_data
 def get_df_dept(dept_no, start_date, end_date):
@@ -61,9 +61,9 @@ def choosebox_dept():
         with cols[2]:
             subcols = st.columns(2)
             with subcols[0]:
-                start_date = st.date_input('Start Date')
+                start_date = st.date_input(st.session_state.text_dict['Start Date'])
             with subcols[1]:
-                end_date = st.date_input('End Date')
+                end_date = st.date_input(st.session_state.text_dict['End Date'])
             is_valid_date = start_date <= end_date
             start_date = start_date.strftime('%Y-%m-%d')
             end_date = end_date.strftime('%Y-%m-%d')
@@ -89,13 +89,13 @@ def choosebox_employee():
         employee_name = st.selectbox(st.session_state.text_dict['Employee'], employee_list)
     with cols[2]:
         choose_date = st.selectbox(st.session_state.text_dict['Date'], [st.session_state.text_dict['Choose Date'], st.session_state.text_dict['All']])
-    if choose_date == 'Choose Date':
+    if choose_date == st.session_state.text_dict['Choose Date']:
         with cols[3]:
             subcols = st.columns(2)
             with subcols[0]:
-                start_date = st.date_input('Start Date')    # start_date value
+                start_date = st.date_input(st.session_state.text_dict['Start Date'])    # start_date value
             with subcols[1]:
-                end_date = st.date_input('End Date')    # end_date value
+                end_date = st.date_input(st.session_state.text_dict['End Date'])    # end_date value
             is_valid_date = start_date <= end_date
             start_date = start_date.strftime('%Y-%m-%d')    # start_date format
             end_date = end_date.strftime('%Y-%m-%d')        # end_date format
@@ -307,6 +307,7 @@ def ai_chat(df):
 def display_dashboard_dept():
     try:
         data = choosebox_dept()
+        data = choosebox_dept()
     except ConnectTimeout as e:
         st.error('Please check your API server.')
         return
@@ -345,7 +346,7 @@ def display_dashboard_dept():
 
     st.divider()
     st.subheader(st.session_state.text_dict['Summary'], divider='gray')
-    summary = summary_dept(df, dept_no, start_date, end_date)
+    summary = summary_dept(df, dept_no, start_date, end_date, st.session_state.language)
     st.markdown(summary)
 
     st.divider()
@@ -393,29 +394,28 @@ def display_dashboard_employee():
 
     st.divider()
     st.subheader(st.session_state.text_dict['Summary'], divider='gray')
-    summary = summary_employee(df, employee_name, start_date, end_date)
+    summary = summary_employee(df, employee_name, start_date, end_date, st.session_state.language)
     st.markdown(summary)
 
     st.divider()
     st.subheader(st.session_state.text_dict['Ask AI'])
     ai_chat(df)
 
+# change language
+def changeLanguage():
+    if st.session_state.language == 'en':
+        st.session_state.language = 'zh-tw'
+    else:
+        st.session_state.language = 'en'
+    
+    st.session_state.text_dict.update(text_dict[st.session_state.language])
 
 def main():
     
     st.set_page_config(page_title=st.session_state.text_dict['page_title'], layout='wide', page_icon='clown_face')
-
-    ## multi language
-    languages = {'English': 'en', 'Chinese': 'zh-tw'}
-    selected_language = st.selectbox('Select Language', list(languages.keys()))
-    dest_lang = languages[selected_language]
     
-
-    # change language
-    if dest_lang != st.session_state.language:
-        st.session_state.language = dest_lang
-        st.session_state.text_dict.update(text_dict[dest_lang])
-        
+    ## mutil language
+    st.button(st.session_state.text_dict['Switch Languages'], on_click=changeLanguage)
 
     st.header('Dashboard API')
 
@@ -429,7 +429,7 @@ def main():
     
 if __name__ == '__main__':
 
-    # get English & Chinese Dictionary
+    # get English & Chinese DictionaryN
     default_dict = getdefaultDict()
     chinese_dict = getChineseDict()
 
@@ -446,4 +446,5 @@ if __name__ == '__main__':
     # default is English
     if 'language' not in st.session_state:
         st.session_state.language = 'en'
+
     main()

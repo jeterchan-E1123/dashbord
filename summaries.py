@@ -68,9 +68,9 @@ def get_duration_str(start_date, end_date):
     start_date_object = datetime.strptime(start_date, '%Y-%m-%d').date()
     end_date_object = datetime.strptime(end_date, '%Y-%m-%d').date()
     duration = end_date_object - start_date_object
-    return f'During the span of **{duration.days}** days'
+    return duration.days
 
-def summary_dept(df, dept_no, start_date, end_date):
+def summary_dept(df, dept_no, start_date, end_date, language):
     if start_date.lower() == 'all':
         start_date = df.record_date.min()
         end_date = df.record_date.max()
@@ -87,18 +87,29 @@ def summary_dept(df, dept_no, start_date, end_date):
     proj_type_dict = get_project_type_percentage(df_proj, df_ratio_dept, main_proj_list)
     proj_type_str = get_proj_type_str(proj_type_dict, df.dept_type[0][0], dept_name)
 
-    summary = f'''
+    if language == 'en':
+        summary = f'''
 ###### Date: {date_str}\n
 ###### Department Name: {dept_name} ({dept_no})\n
 ###### No. of Employees: {employee_count}\n
 ###### Summary:
-{duration_str}, the **{dept_name}** Department focused on the following key projects: *{', '.join(main_proj_list)}*.\n
+During the span of **{duration_str}** days, the **{dept_name}** Department focused on the following key projects: *{', '.join(main_proj_list)}*.\n
 {proj_type_str}
 In total, {dept_name} Department contributed **{df_ratio_dept.work_hours.sum()} hours** during this period.\n
 '''
+    elif language == 'zh-tw':
+        summary = f'''
+###### 日期: {date_str}\n
+###### 部門名稱: {dept_name} ({dept_no})\n
+###### 員工數量: {employee_count}\n
+###### 摘要:
+在過去的 **{duration_str}** 天內, **{dept_name}** 部門花費較多的時間在以下的專案: *{', '.join(main_proj_list)}*。\n
+{proj_type_str}
+整體而言, {dept_name} 部門在此段時間貢獻 **{df_ratio_dept.work_hours.sum()} 小時**。\n
+'''
     return summary
 
-def summary_employee(df, employee_name, start_date, end_date):
+def summary_employee(df, employee_name, start_date, end_date, language):
     if start_date.lower() == 'all':
         start_date = df.record_date.min()
         end_date = df.record_date.max()
@@ -114,17 +125,30 @@ def summary_employee(df, employee_name, start_date, end_date):
     proj_type_str = get_proj_type_str(proj_type_dict, df.dept_type[0][0], dept_name)
     lt8_date_list = get_lt8_date_list(df)
 
-    summary = f'''
+    if language == 'en':
+        summary = f'''
 ###### Date: {date_str}\n
 ###### Employee Name: {employee_name}\n
 ###### Department: {dept_name} ({df.dept_no[0]})\n
 ###### Summary:
-{duration_str}, **{employee_name}** focused on the following projects: *{', '.join(main_proj_list)}*.\n
+During the span of **{duration_str}** days, **{employee_name}** focused on the following projects: *{', '.join(main_proj_list)}*.\n
 {proj_type_str}
 In total, {employee_name} contributed **{df_ratio.work_hours.sum()} hours** during this period.\n
 '''
+    elif language == 'zh-tw':
+        summary = f'''
+###### 日期: {date_str}\n
+###### 員工姓名: {employee_name}\n
+###### 部門: {dept_name} ({df.dept_no[0]})\n
+###### 摘要:
+在過去的 **{duration_str}** 內, **{employee_name}** 花費最多時間的專案是 *{', '.join(main_proj_list)}*。\n
+{proj_type_str}
+整體而言, {employee_name} 在此段時間貢獻 **{df_ratio.work_hours.sum()} 小時**。\n
+'''
     
-    if len(lt8_date_list) > 0:
+    if len(lt8_date_list) > 0 and language == 'en':
         summary += f"Notably, {employee_name} worked **less than 8 hours** on the following dates: {', '.join(lt8_date_list)}.\n"
+    elif len(lt8_date_list) > 0 and language == 'zh-tw':
+        summary += f"註記: {employee_name} 工作 **小於8小時** 的日期有: {', '.join(lt8_date_list)}.\n"
     
     return summary
