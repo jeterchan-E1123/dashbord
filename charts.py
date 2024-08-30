@@ -81,13 +81,13 @@ def dept_chart_ratio(df, employee_name):
     '''
     df_ratio = create_df_ratio(df)
     
-    if employee_name != 'All' and employee_name != 'All (Employee Detail)':
+    if (employee_name != 'All' and employee_name != '全部') and (employee_name != 'All (Employee Detail)' and employee_name != '所有（員工細節）'):
         df_ratio = df_ratio.loc[df_ratio.user_id == employee_name]
     
-    if employee_name == 'All (Employee Detail)':
+    if employee_name == 'All (Employee Detail)' or employee_name == '所有（員工細節）':
         fig = px.sunburst(df_ratio, path=['project_type', 'user_id'], values='work_hours', color='project_type', color_discrete_map=project_type_colors)
         fig.update_traces(textinfo='label+percent root')
-    elif employee_name == 'All (Project Detail)':
+    elif employee_name == 'All (Project Detail)' or employee_name == '所有（專案細節）':
         fig = px.sunburst(df, path=['project_type', 'project_name'], values='work_hours', color='project_type', color_discrete_map=project_type_colors)
         fig.update_traces(textinfo='label+percent root')
     else:

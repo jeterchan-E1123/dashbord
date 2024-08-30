@@ -5,12 +5,26 @@ from selectbox import get_selectbox_items, get_employee_list
 from charts import dept_chart_task, dept_chart_ratio, employee_chart_task, employee_chart_ratio, gantt_dept, gantt_employee
 from summaries import summary_dept as _summary_dept, summary_employee as _summary_employee
 from dataframes import get_df_dept as _get_df_dept, get_df_employee as _get_df_employee
-from task_summary import task_summary as _task_summary, get_chat_answer
-from text_dict import text_dict
+from task_summary import task_summary as _task_summary
+from ai_chat import get_chat_answer
+
+## for translate 
+from googletrans import Translator
+from googletrans.models import Translated
+from text_dict import getdefaultDict,getChineseDict
+
+# initial google translator
+translator = Translator()
+# origin_dict = getTextDict()
+
+## translate language to dest_lang
+def translate_text(text,dest_lang):
+    translation = translator.translate(text, dest=dest_lang)
+    return translation.text
+
 
 project_type_colors = {'A': '#d55454', 'B': '#eea964', 'C': '#968cce', 'D': '#f2dac2'}
 
-st.set_page_config(page_title=text_dict['page_title'], layout='wide', page_icon='clown_face')
 
 @st.cache_data
 def summary_dept(df, dept_no, start_date, end_date):
@@ -32,6 +46,8 @@ def get_df_employee(employee_name, dept_no, start_date, end_date):
 def task_summary(df, task_name, type):
     return _task_summary(df, task_name, type)
 
+
+
 def choosebox_dept():
     cols = st.columns(3)
     
@@ -39,10 +55,10 @@ def choosebox_dept():
         dept_list, formatted_dict = get_selectbox_items()
         if dept_list is None or formatted_dict is None:
             return None
-        dept_no = st.selectbox('Department', dept_list, format_func=lambda x: formatted_dict.get(x))
+        dept_no = st.selectbox(st.session_state.text_dict['Department'], dept_list, format_func=lambda x: formatted_dict.get(x))
     with cols[1]:
-        choose_date = st.selectbox('Date', ['Choose Date', 'All'])
-    if choose_date == 'Choose Date':
+        choose_date = st.selectbox(st.session_state.text_dict['Date'], [st.session_state.text_dict['Choose Date'], st.session_state.text_dict['All']])
+    if choose_date == st.session_state.text_dict['Choose Date']:
         with cols[2]:
             subcols = st.columns(2)
             with subcols[0]:
@@ -66,14 +82,14 @@ def choosebox_employee():
         dept_list, formatted_dict = get_selectbox_items()
         if dept_list is None or formatted_dict is None:
             return None
-        dept_no = st.selectbox('Department', dept_list, format_func=lambda x: formatted_dict.get(x))
+        dept_no = st.selectbox(st.session_state.text_dict['Department'], dept_list, format_func=lambda x: formatted_dict.get(x))
     with cols[1]:
         employee_list = get_employee_list(dept_no)
         if employee_list is None:
             return 404
-        employee_name = st.selectbox('Employee', employee_list)
+        employee_name = st.selectbox(st.session_state.text_dict['Employee'], employee_list)
     with cols[2]:
-        choose_date = st.selectbox('Date', ['Choose Date', 'All'])
+        choose_date = st.selectbox(st.session_state.text_dict['Date'], [st.session_state.text_dict['Choose Date'], st.session_state.text_dict['All']])
     if choose_date == 'Choose Date':
         with cols[3]:
             subcols = st.columns(2)
@@ -95,19 +111,19 @@ def display_charts_dept(df: pd.DataFrame):
     cols = st.columns(2)
     
     with cols[0].container(border=True):
-        st.subheader('Working Hours')
+        st.subheader(st.session_state.text_dict['Working Hours'])
         
         subcols_l = st.columns(2)
         with subcols_l[0]:
             project_list = df.project_name.unique().tolist()
-            project_list.insert(0, 'All')
-            project_name = st.selectbox('Project', project_list)
-            disable_task_option = (project_name == 'All')
+            project_list.insert(0, st.session_state.text_dict['All'])
+            project_name = st.selectbox(st.session_state.text_dict['Project'], project_list)
+            disable_task_option = (project_name == st.session_state.text_dict['All'])
             
         with subcols_l[1]:
             task_list = df.loc[df.project_name == project_name].task_name.unique().tolist()
-            task_list.insert(0, 'All')
-            task_name = st.selectbox('Task', task_list, disabled=disable_task_option)
+            task_list.insert(0, st.session_state.text_dict['All'])
+            task_name = st.selectbox(st.session_state.text_dict['Task'], task_list, disabled=disable_task_option)
         
         if disable_task_option:
             # projects chart
@@ -119,19 +135,20 @@ def display_charts_dept(df: pd.DataFrame):
         st.plotly_chart(fig_left, use_container_width=True)
         
     with cols[1].container(border=True):
-        st.subheader('Project Category Ratio')
+        st.subheader(st.session_state.text_dict['Project Category Ratio'])
         
         subcols_r = st.columns(2, vertical_alignment='bottom')
         with subcols_r[0]:
             employee_list = df.user_id.unique().tolist()
-            employee_list.insert(0, 'All (Employee Detail)')
-            employee_list.insert(0, 'All (Project Detail)')
-            employee_list.insert(0, 'All')
-            employee_name = st.selectbox('Employee', employee_list)
+            employee_list.insert(0, st.session_state.text_dict['All (Employee Detail)'])
+            employee_list.insert(0, st.session_state.text_dict['All (Project Detail)'])
+            employee_list.insert(0, st.session_state.text_dict['All'])
+            employee_name = st.selectbox(st.session_state.text_dict['Employee'], employee_list)
         with subcols_r[1]:
             container = st.container(border=True)
-            container.markdown(f'**Dept Type:** {df.dept_type.iat[0][0]}')
+            container.markdown(f'**{st.session_state.text_dict['Dept Type']}:** {df.dept_type.iat[0][0]}')
             
+        st.write(employee_name)
         fig_right = dept_chart_ratio(df, employee_name)
         
         st.plotly_chart(fig_right, use_container_width=True)
@@ -139,30 +156,30 @@ def display_charts_dept(df: pd.DataFrame):
 def display_charts_employee(df: pd.DataFrame):
     cols = st.columns(2)
     with cols[0].container(border=True):
-        st.subheader('Working Hours')
+        st.subheader(st.session_state.text_dict['Working Hours'])
         
         subcols_l = st.columns(2)
         with subcols_l[0]:
-            chart_option = st.selectbox('Chart', ['All Projects', 'All Tasks', 'Choose Project'])
+            chart_option = st.selectbox(st.session_state.text_dict['Chart'], [st.session_state.text_dict['All Projects'], st.session_state.text_dict['All Tasks'], st.session_state.text_dict['Choose Project']])
             
         with subcols_l[1]:
             project_list = df.project_name.unique().tolist()
-            project_list.insert(0, 'All')
-            project_name = st.selectbox('Project', project_list, disabled=(chart_option!='Choose Project'))
+            project_list.insert(0, st.session_state.text_dict['All'])
+            project_name = st.selectbox(st.session_state.text_dict['Project'], project_list, disabled=(chart_option!=st.session_state.text_dict['Choose Project']))
             
         fig_left = employee_chart_task(df, chart_option, project_name)
         
         st.plotly_chart(fig_left, use_container_width=True)
         
     with cols[1].container(border=True):
-        st.subheader('Project Category Ratio')
+        st.subheader(st.session_state.text_dict['Project Category Ratio'])
 
         subcols_r = st.columns(2, vertical_alignment='bottom')
         with subcols_r[0]:
-            pie_chart_option = st.selectbox('Chart', ['Default', 'Project Detail'])
+            pie_chart_option = st.selectbox(st.session_state.text_dict['Chart'], [st.session_state.text_dict['Default'], st.session_state.text_dict['Project Detail']])
         with subcols_r[1]:
             container = st.container(border=True)
-            container.markdown(f'**Dept Type:** {df.dept_type.iat[0][0]}')
+            container.markdown(f'**{st.session_state.text_dict['Dept Type']}:** {df.dept_type.iat[0][0]}')
         
         fig_right = employee_chart_ratio(df, pie_chart_option)
         
@@ -172,27 +189,27 @@ def display_problematic_entries(df: pd.DataFrame):
     cols = st.columns(2)
     with cols[0]:
         project_list = df.project_name.unique().tolist()
-        project_list.insert(0, 'All')
-        project_name = st.selectbox('Project', project_list, key='problem_project')
+        project_list.insert(0, st.session_state.text_dict['All'])
+        project_name = st.selectbox(st.session_state.text_dict['Project'], project_list, key='problem_project')
         
-        if project_name != 'All':
+        if project_name != st.session_state.text_dict['All']:
             df = df.loc[df.project_name == project_name]
     with cols[1]:
         task_list = df.task_name.unique().tolist()
-        task_list.insert(0, 'All')
-        task_name = st.selectbox('Task', task_list, key='problem_task')
+        task_list.insert(0, st.session_state.text_dict['All'])
+        task_name = st.selectbox(st.session_state.text_dict['Task'], task_list, key='problem_task')
         
-        if task_name != 'All':
+        if task_name != st.session_state.text_dict['All']:
             df = df.loc[df.task_name == task_name]
     
     container = st.container(border=True)
     task_employees = ', '.join(df.user_id.unique().tolist())
     no_desc_percentage = df.loc[df.description == ''].shape[0] / df.shape[0]
     with_desc_percentage = df.loc[df.description != ''].shape[0] / df.shape[0]
-    container.markdown(f'''**Employees:** {task_employees}\n
-**Ratio:** No Description :blue-background[{format(no_desc_percentage, '.0%')}] &mdash; With Description :blue-background[{format(with_desc_percentage, '.0%')}]''')
+    container.markdown(f'''**{st.session_state.text_dict['Employees']}:** {task_employees}\n
+**{st.session_state.text_dict['Ratio']}:** {st.session_state.text_dict['No Description']} :blue-background[{format(no_desc_percentage, '.0%')}] &mdash; {st.session_state.text_dict['With Description']} :blue-background[{format(with_desc_percentage, '.0%')}]''')
     
-    tab_list = ['No Description', 'With Description']
+    tab_list = [st.session_state.text_dict['No Description'], st.session_state.text_dict['With Description']]
     tabs = st.tabs(tab_list)
     df_display = df[['dept_name', 'project_name', 'project_type', 'task_name', 'user_id', 'record_date', 'work_hours', 'description']]
     with tabs[0]:
@@ -213,16 +230,16 @@ def display_task_summary(df: pd.DataFrame, type: str):
     cols = st.columns(2)
     with cols[0]:
         project_list = df.project_name.unique().tolist()
-        project_list.insert(0, 'All')
-        project_name = st.selectbox('Project', project_list, key='task_summary_project')
+        project_list.insert(0, st.session_state.text_dict['All'])
+        project_name = st.selectbox(st.session_state.text_dict['Project'], project_list, key='task_summary_project')
         
         if project_name != 'All':
             df = df.loc[df.project_name == project_name]
     with cols[1]:
         task_list = df.task_name.unique().tolist()
-        task_name = st.selectbox('Task', task_list, key='task_summary_task')
+        task_name = st.selectbox(st.session_state.text_dict['Task'], task_list, key='task_summary_task')
     
-    st.button('Create Task Summary', use_container_width=True, on_click=tasksum_clicked)
+    st.button(st.session_state.text_dict['Create Task Summary'], use_container_width=True, on_click=tasksum_clicked)
     # if st.button('Create Task Summary', use_container_width=True, on_click=task_summary.clear):
     if st.session_state.tasksum_clicked:
         with st.spinner('Creating task summary...'):
@@ -254,22 +271,22 @@ def display_dashboard_dept():
         st.error('Please check your API connection.')
         return
     elif data == 404:
-        st.info('No data found.')
+        st.info(st.session_state.text_dict['No data found.'])
         return
     
     dept_no, start_date, end_date, is_valid_date = data
     
     if not is_valid_date:
-        st.error('Invalid Date')
+        st.error(st.session_state.text_dict['Invalid Date'])
         return
     
     df = get_df_dept(dept_no, start_date, end_date)
     
     if df is None:
-        st.info('No timesheet data found')
+        st.info(st.session_state.text_dict['No timesheet data found'])
         return
     
-    tab_list = ['Charts', 'Gantt', 'Table']
+    tab_list = [st.session_state.text_dict['Charts'], st.session_state.text_dict['Gantt'], st.session_state.text_dict['Table']]
     tabs = st.tabs(tab_list)
     with tabs[0]: # Charts
         display_charts_dept(df)
@@ -280,20 +297,20 @@ def display_dashboard_dept():
         st.dataframe(df, use_container_width=True)
 
     st.divider()
-    st.subheader('Problematic Entries')
+    st.subheader(st.session_state.text_dict['Problematic Entries'])
     display_problematic_entries(df)
     
     st.divider()
-    st.subheader('Task Summary')
+    st.subheader(st.session_state.text_dict['Task Summary'])
     display_task_summary(df, type='dept')
 
     st.divider()
-    st.subheader('Summary', divider='gray')
+    st.subheader(st.session_state.text_dict['Summary'], divider='gray')
     summary = summary_dept(df, dept_no, start_date, end_date)
     st.markdown(summary)
 
     st.divider()
-    st.subheader('Ask AI')
+    st.subheader(st.session_state.text_dict['Ask AI'])
     ai_chat(df)
 
 def display_dashboard_employee():
@@ -302,22 +319,22 @@ def display_dashboard_employee():
         st.error('Please check your API connection.')
         return
     elif data == 404:
-        st.info('No data found.')
+        st.info(st.session_state.text_dict['No data found.'])
         return
     
     employee_name, dept_no, start_date, end_date, is_valid_date = data
     
     if not is_valid_date:
-        st.error('Invalid Date')
+        st.error(st.session_state.text_dict['Invalid Date'])
         return
     
     df = get_df_employee(employee_name, dept_no, start_date, end_date)
     
     if df is None:
-        st.info('No timesheet data found')
+        st.info(st.session_state.text_dict['No timesheet data found'])
         return
     
-    tab_list = ['Charts', 'Gantt', 'Table']
+    tab_list = [st.session_state.text_dict['Charts'], st.session_state.text_dict['Gantt'], st.session_state.text_dict['Table']]
     tabs = st.tabs(tab_list)
     with tabs[0]: # Charts
         display_charts_employee(df)
@@ -328,32 +345,66 @@ def display_dashboard_employee():
         st.dataframe(df, use_container_width=True)
 
     st.divider()
-    st.subheader('Problematic Entries')
+    st.subheader(st.session_state.text_dict['Problematic Entries'])
     display_problematic_entries(df)
 
     st.divider()
-    st.subheader('Task Summary')
+    st.subheader(st.session_state.text_dict['Task Summary'])
     display_task_summary(df, type='employee')
 
     st.divider()
-    st.subheader('Summary', divider='gray')
+    st.subheader(st.session_state.text_dict['Summary'], divider='gray')
     summary = summary_employee(df, employee_name, start_date, end_date)
     st.markdown(summary)
 
     st.divider()
-    st.subheader('Ask AI')
+    st.subheader(st.session_state.text_dict['Ask AI'])
     ai_chat(df)
 
 
 def main():
-    st.header('Dashboard API')
-    dashboard = st.radio('Choose Dashboard', ['Department', 'Employee'], horizontal=True, label_visibility='collapsed')
     
-    if dashboard == 'Department':
+    st.set_page_config(page_title=st.session_state.text_dict['page_title'], layout='wide', page_icon='clown_face')
+
+    ## mutil language
+    languages = {'English': 'en', 'Chinese': 'zh-tw'}
+    selected_language = st.selectbox('Select Language', list(languages.keys()))
+    dest_lang = languages[selected_language]
+    
+
+    # change language
+    if dest_lang != st.session_state.language:
+        st.session_state.language = dest_lang
+        st.session_state.text_dict.update(text_dict[dest_lang])
+        
+
+    st.header('Dashboard API')
+
+    dashboard = st.radio('Choose Dashboard', [st.session_state.text_dict['Department'], st.session_state.text_dict['Employee']], horizontal=True, label_visibility='collapsed')
+    
+    if dashboard == st.session_state.text_dict['Department']:
         display_dashboard_dept()
     else:
         display_dashboard_employee()
     
     
 if __name__ == '__main__':
+
+    # get English & Chinese Dictionary
+    default_dict = getdefaultDict()
+    chinese_dict = getChineseDict()
+
+    # combine en & zh-tw dict
+    text_dict = {
+        'en':default_dict,
+        'zh-tw':chinese_dict
+    }
+
+    # set default value of text_dict
+    if 'text_dict' not in st.session_state:
+        st.session_state.text_dict = default_dict.copy()
+
+    # default is English
+    if 'language' not in st.session_state:
+        st.session_state.language = 'en'
     main()
