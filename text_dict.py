@@ -39,7 +39,11 @@ default_dict = {
     'Ask AI':'Ask AI',
     'Switch Languages':'Switch Languages',
     'Start Date':'Start Date',
-    'End Date':'End Date'
+    'End Date':'End Date',
+    'Task Insights':'Task Insights',
+    "Table: No Description":"Table: No Description",
+    "Table: With Description":"Table: With Description",
+    "Task Insights":"Task Insights"
 }
 
 chinese_dict = {
@@ -79,7 +83,10 @@ chinese_dict = {
     'Switch Languages':'切換語言',
     'Start Date':'開始日期',
     'End Date':'結束日期',
-    'No timesheet data found':'沒有資料'
+    'No timesheet data found':'沒有資料',
+    'Table: No Description':'表格： 無描述',
+    'Table: With Description':'表格： 有描述',
+    'Task Insights':'任務洞察'
 }
 
 def getdefaultDict():

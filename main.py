@@ -307,7 +307,6 @@ def ai_chat(df):
 def display_dashboard_dept():
     try:
         data = choosebox_dept()
-        data = choosebox_dept()
     except ConnectTimeout as e:
         st.error('Please check your API server.')
         return
