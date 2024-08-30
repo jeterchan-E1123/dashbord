@@ -47,7 +47,6 @@ def task_summary(df, task_name, type):
     return _task_summary(df, task_name, type)
 
 
-
 def choosebox_dept():
     cols = st.columns(3)
     
@@ -379,7 +378,7 @@ def main():
     
     st.set_page_config(page_title=st.session_state.text_dict['page_title'], layout='wide', page_icon='clown_face')
 
-    ## mutil language
+    ## multi language
     languages = {'English': 'en', 'Chinese': 'zh-tw'}
     selected_language = st.selectbox('Select Language', list(languages.keys()))
     dest_lang = languages[selected_language]
@@ -393,7 +392,7 @@ def main():
 
     st.header('Dashboard API')
 
-    dashboard = st.radio('Choose Dashboard', [st.session_state.text_dict['Department'], st.session_state.text_dict['Employee']], horizontal=True, label_visibility='collapsed')
+    dashboard = st.radio('Choose Dashboard', [st.session_state.text_dict['Department'], st.session_state.text_dict['Employee']], horizontal=True, label_visibility='collapsed', on_change=reset_tasksum)
     
     if dashboard == st.session_state.text_dict['Department']:
         display_dashboard_dept()
