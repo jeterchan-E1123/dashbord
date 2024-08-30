@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from requests.exceptions import ConnectTimeout
 
 from selectbox import get_selectbox_items, get_employee_list
 from charts import dept_chart_task, dept_chart_ratio, employee_chart_task, employee_chart_ratio, gantt_dept, gantt_employee
@@ -21,7 +22,6 @@ translator = Translator()
 def translate_text(text,dest_lang):
     translation = translator.translate(text, dest=dest_lang)
     return translation.text
-
 
 project_type_colors = {'A': '#d55454', 'B': '#eea964', 'C': '#968cce', 'D': '#f2dac2'}
 
@@ -204,8 +204,13 @@ def display_problematic_entries(df: pd.DataFrame):
     
     container = st.container(border=True)
     task_employees = ', '.join(df.user_id.unique().tolist())
-    no_desc_percentage = df.loc[df.description == ''].shape[0] / df.shape[0]
-    with_desc_percentage = df.loc[df.description != ''].shape[0] / df.shape[0]
+
+    if df.shape[0] == 0:
+        no_desc_percentage = 0
+        with_desc_percentage = 0
+    else:
+        no_desc_percentage = df.loc[df.description == ''].shape[0] / df.shape[0]
+        with_desc_percentage = df.loc[df.description != ''].shape[0] / df.shape[0]
     container.markdown(f'''**{st.session_state.text_dict['Employees']}:** {task_employees}\n
 **{st.session_state.text_dict['Ratio']}:** {st.session_state.text_dict['No Description']} :blue-background[{format(no_desc_percentage, '.0%')}] &mdash; {st.session_state.text_dict['With Description']} :blue-background[{format(with_desc_percentage, '.0%')}]''')
     
@@ -226,31 +231,31 @@ def tasksum_clicked():
     st.session_state.tasksum_clicked = True
     task_summary.clear()
 
+def reset_tasksum():
+    st.session_state.tasksum_clicked = False
+
 def display_task_summary(df: pd.DataFrame, type: str):
     cols = st.columns(2)
     with cols[0]:
         project_list = df.project_name.unique().tolist()
         project_list.insert(0, st.session_state.text_dict['All'])
-        project_name = st.selectbox(st.session_state.text_dict['Project'], project_list, key='task_summary_project')
+        project_name = st.selectbox(st.session_state.text_dict['Project'], project_list, key='task_summary_project', on_change=reset_tasksum)
         
         if project_name != 'All':
             df = df.loc[df.project_name == project_name]
     with cols[1]:
         task_list = df.task_name.unique().tolist()
-        task_name = st.selectbox(st.session_state.text_dict['Task'], task_list, key='task_summary_task')
+        task_name = st.selectbox(st.session_state.text_dict['Task'], task_list, key='task_summary_task', on_change=reset_tasksum)
     
     st.button(st.session_state.text_dict['Create Task Summary'], use_container_width=True, on_click=tasksum_clicked)
     # if st.button('Create Task Summary', use_container_width=True, on_click=task_summary.clear):
     if st.session_state.tasksum_clicked:
         with st.spinner('Creating task summary...'):
-            # try:
-            #     result = task_summary(df, task_name)
-            # except Exception as e:
-            #     st.error(e)
-            # else:
-            #     st.chat_message('ai').write(result)
-            result = task_summary(df, task_name, type=type)
-            st.chat_message('ai').write(result)
+            try:
+                result = task_summary(df, task_name, type=type)
+                st.chat_message('ai').write(result)
+            except Exception as e:
+                st.error(e)
 
 def ai_chat(df):
     container = st.container()
@@ -266,7 +271,11 @@ def ai_chat(df):
                 st.write(answer)
 
 def display_dashboard_dept():
-    data = choosebox_dept()
+    try:
+        data = choosebox_employee()
+    except ConnectTimeout as e:
+        st.error('Please check your API server.')
+        return
     if data is None:
         st.error('Please check your API connection.')
         return
@@ -314,7 +323,11 @@ def display_dashboard_dept():
     ai_chat(df)
 
 def display_dashboard_employee():
-    data = choosebox_employee()
+    try:
+        data = choosebox_employee()
+    except ConnectTimeout as e:
+        st.error('Please check your API server.')
+        return
     if data is None:
         st.error('Please check your API connection.')
         return

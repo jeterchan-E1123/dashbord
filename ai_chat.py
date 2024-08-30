@@ -64,7 +64,7 @@ def get_chat_prompt(df, rendered_tools):
     prompt_template = """You are a data analyst for a company, and you have access to a dataframe containing detailed information about employee timesheets. This dataframe includes data such as task names, descriptions, work hours, and other relevant details.
 
 Here is the dataframe: {df}
-    
+
 Your role is to respond to questions from the company's managers regarding the data in this timesheet dataframe.
 You answer should consist of only the answer to the question. **You do not need to explain the process, calculations, or steps you used to arrive at that answer.**
 
@@ -114,8 +114,7 @@ def get_chat_answer(df, question):
             raise e
         answer = answer.removeprefix(prefix1).strip()
         answer = answer.removeprefix(prefix2).removesuffix('`').strip()
-    except Exception as e:
-        # answer = 'Please ask me a simpler question 😔'
-        answer = e
+    except:
+        answer = 'Please ask me a simpler question 😔'
 
     return answer
