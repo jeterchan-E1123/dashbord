@@ -16,26 +16,10 @@ bedrock_client = boto3.client(service_name="bedrock-runtime")
 
 def get_repl_functions():
     repl_func = """
-def get_df():
-    from connect import fetch_records
-    query = '''
-        SELECT dept.dept_no, dept.dept_name_en, dept2.or_level_id,
-        ts.project_id, proj.proj_name_cn, proj.proj_type, ts.task_id, task.proj_tk_name, 
-        ts.user_id, ts.record_date, ts.work_hours, ts.work_overtime, ts.description
-        FROM ma_or_dept_graph_v AS dept
-        JOIN huntergame.ts_record AS ts ON ts.dept_no = dept.dept_no
-        JOIN huntergame.proj_info AS proj ON proj.proj_id = ts.project_id
-        JOIN huntergame.proj_tk AS task ON task.id = ts.task_id
-        JOIN ma_or_department AS dept2 ON dept2.dept_no = dept.dept_no
-        WHERE dept_no_root = '88A31200BE'
-        AND ts.record_date >= '2024-01-01'
-        AND ts.record_date <= '2024-02-17'
-    '''
-    input = fetch_records(query)
-    df = pd.DataFrame(input, columns=['dept_no', 'dept_name', 'dept_type', 'project_id', 'project_name', 'project_type', 'task_id', 'task_name',
-                                        'user_id', 'record_date', 'work_hours', 'work_overtime', 'description'])
-
-    return df
+def get_date():
+    '''Get today's date in the string format yyyy-mm-dd. No input parameter necessary.'''
+    from datetime import datetime
+    return datetime.today().strftime('%Y-%m-%d')
 """
     return repl_func
 
@@ -72,7 +56,7 @@ You have access to the following tools to assist in your analysis: {rendered_too
 
 Focus on delivering precise, accurate answers directly based on the data, ensuring that your responses are concise and to the point.
 """
-# for the python_repl tool, you can utilize this additional function by declaring it in the repl if necessary: {repl_functions}
+# for the python_repl_ast tool, you can utilize this additional function by declaring it in the repl if necessary: {repl_functions}
 
     prompt = ChatPromptTemplate.from_messages(
         [("system", prompt_template), ("user", "{input}")]
@@ -102,7 +86,7 @@ def get_chat_agent(df):
 
 def get_chat_answer(df, question):
     agent = get_chat_agent(df)
-    tools, rendered_tools = get_chat_tools(df)
+    _, rendered_tools = get_chat_tools(df)
 
     try:
         answer = agent.invoke({'input': question, 'df': df, 'rendered_tools': rendered_tools})['output']
