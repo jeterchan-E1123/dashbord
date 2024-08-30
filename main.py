@@ -146,7 +146,7 @@ def display_charts_dept(df: pd.DataFrame):
             employee_name = st.selectbox(st.session_state.text_dict['Employee'], employee_list)
         with subcols_r[1]:
             container = st.container(border=True)
-            container.markdown(f'**{st.session_state.text_dict['Dept Type']}:** {df.dept_type.iat[0][0]}')
+            container.markdown(f"**{st.session_state.text_dict['Dept Type']}:** {df.dept_type.iat[0][0]}")
             
         st.write(employee_name)
         fig_right = dept_chart_ratio(df, employee_name)
@@ -179,7 +179,7 @@ def display_charts_employee(df: pd.DataFrame):
             pie_chart_option = st.selectbox(st.session_state.text_dict['Chart'], [st.session_state.text_dict['Default'], st.session_state.text_dict['Project Detail']])
         with subcols_r[1]:
             container = st.container(border=True)
-            container.markdown(f'**{st.session_state.text_dict['Dept Type']}:** {df.dept_type.iat[0][0]}')
+            container.markdown(f"**{st.session_state.text_dict['Dept Type']}:** {df.dept_type.iat[0][0]}")
         
         fig_right = employee_chart_ratio(df, pie_chart_option)
         
