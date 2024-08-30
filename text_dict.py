@@ -36,7 +36,10 @@ default_dict = {
     "No timesheet data found":"No timesheet data found",
     "Invalid Date":"Invalid Date",
     "No data found.":"No data found.",
-    "Ask AI":"Ask AI"
+    "Ask AI":"Ask AI",
+    "Table: No Description":"Table: No Description",
+    "Table: With Description":"Table: With Description",
+    "Task Insights":"Task Insights"
 }
 
 chinese_dict = {
@@ -72,7 +75,10 @@ chinese_dict = {
     'Task Summary': '任務摘要',
     'Create Task Summary': '創建任務摘要',
     'Summary': '摘要',
-    'Ask AI':'詢問AI'
+    'Ask AI':'詢問AI',
+    'Table: No Description':'表格： 無描述',
+    'Table: With Description':'表格： 有描述',
+    'Task Insights':'Task Insights'
 }
 
 def getdefaultDict():
