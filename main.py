@@ -233,28 +233,63 @@ def tasksum_clicked():
 def reset_tasksum():
     st.session_state.tasksum_clicked = False
 
-def display_task_summary(df: pd.DataFrame, type: str):
+def display_task_insights(df: pd.DataFrame, type: str):
     cols = st.columns(2)
     with cols[0]:
         project_list = df.project_name.unique().tolist()
         project_list.insert(0, st.session_state.text_dict['All'])
-        project_name = st.selectbox(st.session_state.text_dict['Project'], project_list, key='task_summary_project', on_change=reset_tasksum)
+        project_name = st.selectbox(st.session_state.text_dict['Project'], project_list, key='task_insights_project', on_change=reset_tasksum)
         
         if project_name != 'All':
             df = df.loc[df.project_name == project_name]
     with cols[1]:
         task_list = df.task_name.unique().tolist()
-        task_name = st.selectbox(st.session_state.text_dict['Task'], task_list, key='task_summary_task', on_change=reset_tasksum)
+        task_list.insert(0, st.session_state.text_dict['All'])
+        task_name = st.selectbox(st.session_state.text_dict['Task'], task_list, key='task_insights_task', on_change=reset_tasksum)
     
-    st.button(st.session_state.text_dict['Create Task Summary'], use_container_width=True, on_click=tasksum_clicked)
-    # if st.button('Create Task Summary', use_container_width=True, on_click=task_summary.clear):
-    if st.session_state.tasksum_clicked:
-        with st.spinner('Creating task summary...'):
-            try:
-                result = task_summary(df, task_name, type=type)
-                st.chat_message('ai').write(result)
-            except Exception as e:
-                st.error(e)
+    if task_name != st.session_state.text_dict['All']:
+        no_task_chosen = False
+        df_container = df.loc[df.task_name == task_name]
+    else:
+        no_task_chosen = True
+        df_container = df
+
+    # container for employee list and desc/no desc ratio
+    container = st.container(border=True)
+    task_employees = ', '.join(df_container.user_id.unique().tolist())
+
+    if df.shape[0] == 0:
+        no_desc_percentage = 0
+        with_desc_percentage = 0
+    else:
+        no_desc_percentage = df.loc[df.description == ''].shape[0] / df.shape[0]
+        with_desc_percentage = df.loc[df.description != ''].shape[0] / df.shape[0]
+    container.markdown(f'''**{st.session_state.text_dict['Employees']}:** {task_employees}\n
+**{st.session_state.text_dict['Ratio']}:** {st.session_state.text_dict['No Description']} :blue-background[{format(no_desc_percentage, '.0%')}] &mdash; {st.session_state.text_dict['With Description']} :blue-background[{format(with_desc_percentage, '.0%')}]''')
+
+    # tabs
+    tab_list = [st.session_state.text_dict['Task Summary'], st.session_state.text_dict['Table: No Description'], st.session_state.text_dict['Table: With Description']]
+    tabs = st.tabs(tab_list)
+    df_display = df[['dept_name', 'project_name', 'project_type', 'task_name', 'user_id', 'record_date', 'work_hours', 'description']]
+    with tabs[0]:
+        st.button(st.session_state.text_dict['Create Task Summary'], use_container_width=True, on_click=tasksum_clicked, disabled=no_task_chosen)
+
+        if no_task_chosen:
+            st.info('Please choose a specific task to create task summary.')
+        
+        if st.session_state.tasksum_clicked:
+            with st.spinner('Creating task summary...'):
+                try:
+                    result = task_summary(df, task_name, type=type)
+                    st.chat_message('ai').write(result)
+                except Exception as e:
+                    st.error(e)
+    with tabs[1]:
+        df_nodesc = df_display.loc[df_display.description == '']
+        st.dataframe(df_nodesc.reset_index(drop=True), use_container_width=True)
+    with tabs[2]:
+        df_desc = df_display.loc[df_display.description != '']
+        st.dataframe(df_desc.reset_index(drop=True), use_container_width=True)    
 
 def ai_chat(df):
     container = st.container()
@@ -303,14 +338,10 @@ def display_dashboard_dept():
         st.plotly_chart(gantt, use_container_width=True)
     with tabs[2]: # Table
         st.dataframe(df, use_container_width=True)
-
-    st.divider()
-    st.subheader(st.session_state.text_dict['Problematic Entries'])
-    display_problematic_entries(df)
     
     st.divider()
-    st.subheader(st.session_state.text_dict['Task Summary'])
-    display_task_summary(df, type='dept')
+    st.subheader(st.session_state.text_dict['Task Insights'])
+    display_task_insights(df, type='dept')
 
     st.divider()
     st.subheader(st.session_state.text_dict['Summary'], divider='gray')
@@ -357,12 +388,8 @@ def display_dashboard_employee():
         st.dataframe(df, use_container_width=True)
 
     st.divider()
-    st.subheader(st.session_state.text_dict['Problematic Entries'])
-    display_problematic_entries(df)
-
-    st.divider()
-    st.subheader(st.session_state.text_dict['Task Summary'])
-    display_task_summary(df, type='employee')
+    st.subheader(st.session_state.text_dict['Task Insights'])
+    display_task_insights(df, type='employee')
 
     st.divider()
     st.subheader(st.session_state.text_dict['Summary'], divider='gray')
