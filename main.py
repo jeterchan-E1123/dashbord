@@ -240,7 +240,7 @@ def display_task_insights(df: pd.DataFrame, type: str):
         project_list.insert(0, st.session_state.text_dict['All'])
         project_name = st.selectbox(st.session_state.text_dict['Project'], project_list, key='task_insights_project', on_change=reset_tasksum)
         
-        if project_name != 'All':
+        if project_name != st.session_state.text_dict['All']:
             df = df.loc[df.project_name == project_name]
     with cols[1]:
         task_list = df.task_name.unique().tolist()
