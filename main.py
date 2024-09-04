@@ -147,7 +147,6 @@ def display_charts_dept(df: pd.DataFrame):
             container = st.container(border=True)
             container.markdown(f"**{st.session_state.text_dict['Dept Type']}:** {df.dept_type.iat[0][0]}")
             
-        st.write(employee_name)
         fig_right = dept_chart_ratio(df, employee_name)
         
         st.plotly_chart(fig_right, use_container_width=True)
