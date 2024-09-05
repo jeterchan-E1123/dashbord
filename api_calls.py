@@ -1,6 +1,6 @@
 import requests
 
-instance_ip = '44.242.221.194'
+instance_ip = '35.85.10.230'
 port = '8000'
 
 def get_dept_names():
