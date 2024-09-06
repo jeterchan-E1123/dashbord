@@ -32,7 +32,7 @@ def get_project_type_percentage(df_proj, df_ratio, main_proj_list):
 
     return proj_dict
 
-def get_proj_type_str(proj_type_dict, dept_type, dept_name):
+def get_proj_type_str(proj_type_dict, dept_type, dept_name,language):
     result = f''
     low_performance = False
     low_performance_percentage = 0
@@ -40,9 +40,10 @@ def get_proj_type_str(proj_type_dict, dept_type, dept_name):
     for proj_type in proj_type_dict:
         percentage = proj_type_dict[proj_type]['percentage']
         proj_list = proj_type_dict[proj_type]['projects']
-        if len(proj_list) > 0:
+        if len(proj_list) > 0 and language == 'en':
             result += f"- **{format(percentage, '.2%')}** of time was dedicated to **Project Type {proj_type}**, such as *{', '.join(proj_list)}*.\n"
-
+        elif len(proj_list) > 0 and language == 'zh-tw':
+            result += f"- **{format(percentage, '.2%')}** 的時間貢獻在 **專案類型 {proj_type}**, 例如 *{', '.join(proj_list)}*.\n"
         if dept_type == 'C' and proj_type == 'A' and percentage < 0.6:
             low_performance = True
             low_performance_percentage = percentage
@@ -85,7 +86,7 @@ def summary_dept(df, dept_no, start_date, end_date, language):
     df_ratio_dept = create_df_ratio_dept(df_ratio)
     main_proj_list = get_main_project_list(df_proj)
     proj_type_dict = get_project_type_percentage(df_proj, df_ratio_dept, main_proj_list)
-    proj_type_str = get_proj_type_str(proj_type_dict, df.dept_type[0][0], dept_name)
+    proj_type_str = get_proj_type_str(proj_type_dict, df.dept_type[0][0], dept_name,language)
 
     if language == 'en':
         summary = f'''
@@ -122,7 +123,7 @@ def summary_employee(df, employee_name, start_date, end_date, language):
     df_ratio = create_df_ratio(df)
     main_proj_list = get_main_project_list(df_proj)
     proj_type_dict = get_project_type_percentage(df_proj, df_ratio, main_proj_list)
-    proj_type_str = get_proj_type_str(proj_type_dict, df.dept_type[0][0], dept_name)
+    proj_type_str = get_proj_type_str(proj_type_dict, df.dept_type[0][0], dept_name,language)
     lt8_date_list = get_lt8_date_list(df)
 
     if language == 'en':
