@@ -37,13 +37,13 @@ def dept_chart_task(df, task_name, project_name = None):
 def employee_chart_task(df, chart_option, project_name):
     df_task = create_df_task(df)
     
-    if chart_option == 'All Projects':
+    if chart_option == 'All Projects' or chart_option == '所有專案':
         fig = px.bar(df_task, x='project_name', y='work_hours', title='Hours per Project', color='project_name', text_auto=True, hover_data=['project_type'])
         fig.update_traces(textposition='inside')
         fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
         df_total = df_task.groupby('project_name').sum()
         fig.add_trace(go.Scatter(x=df_total.index, y=df_total.work_hours, text=df_total.work_hours, mode='text', textposition='top center', showlegend=False))
-    elif chart_option == 'Choose Project' and project_name != 'All':
+    elif (chart_option == 'Choose Project' and project_name != 'All') or (chart_option == '選擇專案' and project_name != '全部'):
         df_task = df_task.loc[df_task.project_name == project_name]
         fig = px.bar(df_task, x='task_name', y='work_hours', title='Hours per Task', color='task_name', text_auto=True)
         fig.update_traces(textposition='inside')
