@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from requests.exceptions import ConnectTimeout
+from requests.exceptions import ConnectTimeout, ConnectionError
 
 from selectbox import get_selectbox_items, get_employee_list
 from charts import dept_chart_task, dept_chart_ratio, employee_chart_task, employee_chart_ratio, gantt_dept, gantt_employee
@@ -309,6 +309,9 @@ def display_dashboard_dept():
     except ConnectTimeout as e:
         st.error('Please check your API server.')
         return
+    except ConnectionError as e:
+        st.error('Failed to connect to API.')
+        return
     if data is None:
         st.error('Please check your API connection.')
         return
@@ -356,6 +359,9 @@ def display_dashboard_employee():
         data = choosebox_employee()
     except ConnectTimeout as e:
         st.error('Please check your API server.')
+        return
+    except ConnectionError as e:
+        st.error('Failed to connect to API.')
         return
     if data is None:
         st.error('Please check your API connection.')

@@ -1,30 +1,9 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 import uvicorn
-from pydantic import BaseModel
 
 from connect import fetch_records
 
 app = FastAPI()
-
-current_desc_table = None
-
-class DescTable(BaseModel):
-    dept_name: str
-    project_name: str
-    project_type: str
-    task_name: str
-    user_id: str
-    record_date: str
-    work_hours: float
-    description: str
-
-@app.post('/desc_table/', response_model=DescTable)
-async def upload_desc_table(desc_table: DescTable):
-    current_desc_table = desc_table
-
-@app.get('/desc_table')
-async def get_desc_table():
-    return current_desc_table
 
 @app.get('/dept_names')
 async def get_dept_names():
