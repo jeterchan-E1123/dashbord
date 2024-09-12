@@ -421,7 +421,7 @@ def main():
     ## mutil language
     st.button(st.session_state.text_dict['Switch Languages'], on_click=changeLanguage)
 
-    st.header('Dashboard API')
+    st.header('TimeInsights Dashboard')
 
     dashboard = st.radio('Choose Dashboard', [st.session_state.text_dict['Department'], st.session_state.text_dict['Employee']], horizontal=True, label_visibility='collapsed', on_change=reset_tasksum)
     
