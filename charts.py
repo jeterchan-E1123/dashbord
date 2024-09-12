@@ -15,7 +15,7 @@ def dept_chart_task(df, task_name, project_name = None):
     if project_name is not None and task_name == '*Project':
         df_task = df_task.loc[df_task.project_name == project_name]
     
-    if task_name == 'All':
+    if task_name == 'All' or task_name == '全部':
         fig = px.bar(df_task, x='task_name', y='work_hours', color='user_id', title='Hours per Task', text_auto=True)
         fig.update_traces(textposition='inside')
         fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
